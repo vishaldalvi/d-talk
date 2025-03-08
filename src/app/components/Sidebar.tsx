@@ -79,20 +79,20 @@ const Sidebar = ({ onCreateNewChat }: SidebarProps) => {
   );
 
   const formatTime = (date: Date) => {
+    if (!date) return "--";
+
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const oneDay = 24 * 60 * 60 * 1000;
 
     if (diff < oneDay) {
-      // Ensure consistent time formatting
-      return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+      return date.toISOString().substring(11, 16);
     } else if (diff < oneDay * 7) {
-      return date.toLocaleDateString("en-GB", { weekday: "short" }); // e.g., "Mon"
+      return new Intl.DateTimeFormat("en-GB", { weekday: "short" }).format(date);
     } else {
-      return date.toLocaleDateString("en-GB", { month: "short", day: "numeric" }); // e.g., "Mar 7"
+      return new Intl.DateTimeFormat("en-GB", { month: "short", day: "numeric" }).format(date);
     }
   };
-
 
   return (
     <div className="flex flex-col h-full border-r border-gray-200 dark:border-gray-800 w-72 bg-sidebar">

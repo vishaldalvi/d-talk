@@ -1,17 +1,27 @@
 'use client';
 
-import Login from '@/app/pages/Login';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Login from '@/app/pages/Login';
 
 export default function Home() {
   const router = useRouter();
-  const user = localStorage.getItem('user');
+  const [isClient, setIsClient] = useState(false);
+  const [user, setUser] = useState<string | null>(null);
 
-  if (!user) {
-    return (
-      <Login />
-    );
-  } else {
-    router.push('/chat')
+  useEffect(() => {
+    setIsClient(true);
+    const storedUser = localStorage.getItem('user');
+    setUser(storedUser);
+
+    if (storedUser) {
+      router.push('/chat');
+    }
+  }, [router]);
+
+  if (!isClient) {
+    return null;
   }
+
+  return user ? null : <Login />;
 }

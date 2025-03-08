@@ -8,7 +8,6 @@ import VideoCall from "@/app/components/VideoCall";
 import { Button } from "@/app/components/ui/button";
 import { Phone, Video, ArrowLeft, MoreVertical } from "lucide-react";
 
-// Demo data for the chat
 const DEMO_CONTACTS = [
   {
     id: "1",
@@ -41,11 +40,9 @@ const DEMO_CONTACTS = [
   }
 ];
 
-// Demo messages
 const generateDemoMessages = (contactId: string) => {
   const isEven = parseInt(contactId) % 2 === 0;
   
-  // Base set of messages
   const messages = [
     {
       id: "1",
@@ -118,7 +115,6 @@ const ChatRoom = () => {
   
   useEffect(() => {
     if (contactId) {
-      // Load demo messages
       setMessages(generateDemoMessages(contactId));
     }
   }, [contactId]);
@@ -141,11 +137,7 @@ const ChatRoom = () => {
     };
     
     setMessages(prev => [...prev, newMessage]);
-    
-    // Simulate received message and typing indicator
-    setIsTyping(true);
-    
-    // Simulate message status updates
+    setIsTyping(true);    
     setTimeout(() => {
       setMessages(prev => 
         prev.map(msg => 
@@ -154,7 +146,6 @@ const ChatRoom = () => {
       );
     }, 1000);
     
-    // Simulate reply
     setTimeout(() => {
       setIsTyping(false);
       
@@ -167,7 +158,6 @@ const ChatRoom = () => {
       
       setMessages(prev => [...prev, replyMessage]);
       
-      // Simulate 'read' status
       setTimeout(() => {
         setMessages(prev => 
           prev.map(msg => 
