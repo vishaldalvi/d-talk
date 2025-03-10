@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import Cookies from "js-cookie";
+import { LogOut } from "lucide-react";
 
 type Contact = {
   id: string;
@@ -63,11 +65,12 @@ const DEMO_CONTACTS: Contact[] = [
   }
 ];
 
-type SidebarProps = {
-  onCreateNewChat?: () => void;
-};
+interface SidebarProps {
+  user: { id: string; username: string; name: string; avatar: string; status: number; } | null;
+  onCreateNewChat: () => void;
+}
 
-const Sidebar = ({ onCreateNewChat }: SidebarProps) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, onCreateNewChat }) => {
   const location = usePathname();
   const router = useRouter();
 
@@ -92,6 +95,12 @@ const Sidebar = ({ onCreateNewChat }: SidebarProps) => {
     } else {
       return new Intl.DateTimeFormat("en-GB", { month: "short", day: "numeric" }).format(date);
     }
+  };
+
+  const handleLogout = () => {
+    Cookies.remove("authToken");
+    Cookies.remove("user");
+    router.push("/login");
   };
 
   return (
@@ -252,15 +261,20 @@ const Sidebar = ({ onCreateNewChat }: SidebarProps) => {
 
       {/* User profile */}
       <div className="border-t border-gray-200 dark:border-gray-800 p-4">
-        <div className="flex items-center">
-          <ProfileAvatar
-            name="John Doe"
-            status="online"
-          />
-          <div className="ml-3">
-            <h3 className="text-sm font-medium">John Doe</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Available</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <ProfileAvatar name="John Doe" status="online" />
+            <div className="ml-3">
+              <h3 className="text-sm font-medium">{user ? user.name : "Guest"}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Available</p>
+            </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-red-500 hover:text-red-700 transition"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>

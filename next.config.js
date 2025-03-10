@@ -1,0 +1,1 @@
+console.log("NEXT_PUBLIC_API_URL from config:", process.env.NEXT_PUBLIC_API_URL);

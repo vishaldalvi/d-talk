@@ -1,20 +1,50 @@
 'use client';
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
+interface User {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  status: number;
+}
 
 const Index = () => {
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authToken = Cookies.get("authToken");
+      const storedUser = Cookies.get("user");
+
+      if (!authToken || !storedUser) {
+        router.replace("/login");
+      } else {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error("Error parsing user from cookies:", error);
+          Cookies.remove("user");
+          router.replace("/login");
+        }
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   const handleCreateNewChat = () => {
-    // For demo purposes, navigate to the first contact
     router.push("/chat/1");
   };
 
   return (
     <div className="flex h-screen">
-      <Sidebar onCreateNewChat={handleCreateNewChat} />
+      <Sidebar onCreateNewChat={handleCreateNewChat} user={user} />
       <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center p-6 max-w-md">
           <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6">

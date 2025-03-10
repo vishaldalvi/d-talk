@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { alovaInstance } from "@/app/api/apiClient";
+import Cookies from "js-cookie";
 
 interface User {
   id: string;
@@ -14,6 +16,27 @@ interface AuthContextType {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  register: (username: string, name: string, password: string) => Promise<void>;
+}
+
+interface LoginResponse {
+  user: {
+    id: string;
+    username: string;
+    name: string;
+    avatar: string;
+    status: number;
+  };
+  access_token: string;
+  token_type: string;
+}
+
+interface RegisterResponse {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  status: number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,12 +60,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      const mockUser = { id: "1", username }; // Replace with real API call
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
-      router.push("/chat");
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
+
+      const response = (await alovaInstance.Post("/token", formData).send()) as LoginResponse;
+
+      if (response?.access_token) {
+        Cookies.set("authToken", response.access_token, { expires: 7, secure: true });
+        Cookies.set("user", JSON.stringify(response.user), { expires: 7, secure: true });
+
+        setUser(response.user);
+        router.push("/chat");
+      } else {
+        toast.error("Invalid login credentials or response missing token.");
+      }
     } catch (error) {
-      toast.error("Login failed");
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -54,8 +89,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/login");
   };
 
+  const register = async (username: string, name: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const response = (await alovaInstance
+        .Post("/register", { username, password, name })
+        .send()) as RegisterResponse;
+
+      if (response?.id) {
+        toast.success("Registration successful! Redirecting to login...");
+        router.push("/login");
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

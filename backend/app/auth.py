@@ -4,28 +4,26 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
+import uuid
+import binascii
 from dotenv import load_dotenv
 
 from app.models import User, TokenData
-from app.database import users_db
+from app.database import get_user_from_db
 
-# Load environment variables
 load_dotenv()
 
-# Auth settings
 JWT_SECRET = os.getenv(
     "JWT_SECRET",
     "968fib3jLYhiMs6J6VEf2JcxMrp11s7gc+VSXkrl0FJ2vBbmVH7AvnkXN80xReaJJjVk35yvFBEOXeYoLKn1dQ==",
 )
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
-# Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-# Auth functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -34,17 +32,11 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(username: str):
-    if username in users_db:
-        return users_db[username]
-    return None
-
-
 def authenticate_user(username: str, password: str):
-    user = get_user(username)
+    user = get_user_from_db(username)
     if not user:
         return False
-    if not verify_password(password, user.password_hash):
+    if not verify_password(password, user.get("password_hash")):
         return False
     return user
 
@@ -74,7 +66,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(token_data.username)
+    user = get_user_from_db(token_data.username)
     if user is None:
         raise credentials_exception
     return user
+
+
+def generate_uuid():
+    return str(uuid.uuid4())

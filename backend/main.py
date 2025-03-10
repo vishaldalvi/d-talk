@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from datetime import timedelta
 from app.routers import auth, users, messages, calls
 
-from app.auth import get_user, get_password_hash, create_access_token
+from app.auth import get_password_hash, create_access_token
+from app.database import get_user_from_db
 
 # Load environment variables
 load_dotenv()
@@ -37,6 +38,11 @@ def hello():
     )
 
     return {"token": access_token}
+
+
+@app.get("/get_user")
+def user():
+    return get_user_from_db("vishal.d")
 
 
 if __name__ == "__main__":

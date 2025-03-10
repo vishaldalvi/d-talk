@@ -40,7 +40,6 @@ async def publish_to_centrifugo(channel: str, data: dict):
         return True
 
 async def generate_centrifugo_token(user_id: str):
-    # Create token that will be valid for 24 hours
     expire = datetime.utcnow() + timedelta(days=1)
     
     claims = {

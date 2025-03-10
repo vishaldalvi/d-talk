@@ -10,7 +10,7 @@ class User(BaseModel):
     name: str
     avatar: Optional[str] = None
     password_hash: str
-    status: str = "offline"
+    status: int = 1
 
 class UserCreate(BaseModel):
     username: str
@@ -23,7 +23,7 @@ class UserOut(BaseModel):
     username: str
     name: str
     avatar: Optional[str] = None
-    status: str
+    status: int
 
 # Auth models
 class Token(BaseModel):

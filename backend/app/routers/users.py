@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from app.models import User, UserOut
-from app.database import users_db
+from app.database import get_user_from_db, get_all_contacts, get_users_with_last_message
 from app.auth import get_current_user
 from app.centrifugo import publish_to_centrifugo
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+users_db = get_user_from_db()
 
 
 @router.get("/me", response_model=UserOut)
@@ -50,3 +52,10 @@ async def update_user_status(
     )
 
     return {"status": "updated"}
+
+
+@router.get("/contacts")
+def get_contacts(current_user: dict = Depends(get_current_user)):
+    """Fetch contacts for the authenticated user"""
+    return get_users_with_last_message()
+    # return get_all_contacts()
