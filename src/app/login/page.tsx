@@ -36,10 +36,10 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">D-Talk </CardTitle>
-          <CardDescription className="text-center">
-            Enter your username and password to sign in
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold text-center">D-Talks </CardTitle>
+          {/* <CardDescription className="text-center"> */}
+          <h1 className="text-center">Talk Freely, Connect Deeply.</h1>
+          {/* </CardDescription> */}
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">

@@ -61,7 +61,8 @@ const Index = () => {
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Welcome to D-Talk</h1>
+          <h1 className="text-2xl font-bold mb-2">Welcome to D-Talks</h1>
+          <h5 className="text-lg mb-2">Talk Freely, Connect Deeply.</h5>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
             Select a conversation from the sidebar or start a new chat
           </p>

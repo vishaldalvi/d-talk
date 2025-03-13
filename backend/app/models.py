@@ -1,22 +1,24 @@
-
 from pydantic import BaseModel
 from typing import Dict, List, Optional
 from datetime import datetime
+
 
 # User models
 class User(BaseModel):
     id: str
     username: str
     name: str
-    avatar: Optional[str] = None
+    avatar: str = None
     password_hash: str
     status: int = 1
+
 
 class UserCreate(BaseModel):
     username: str
     password: str
     name: str
     avatar: Optional[str] = None
+
 
 class UserOut(BaseModel):
     id: str
@@ -25,14 +27,17 @@ class UserOut(BaseModel):
     avatar: Optional[str] = None
     status: int
 
+
 # Auth models
 class Token(BaseModel):
     access_token: str
     token_type: str
     user: UserOut
 
+
 class TokenData(BaseModel):
     username: str
+
 
 # Message models
 class Message(BaseModel):
@@ -43,9 +48,11 @@ class Message(BaseModel):
     timestamp: datetime
     status: str = "sent"
 
+
 class MessageCreate(BaseModel):
     receiver_id: str
     content: str
+
 
 # Call models
 class CallSignal(BaseModel):

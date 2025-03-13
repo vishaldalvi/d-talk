@@ -32,7 +32,7 @@ async def get_users(current_user: User = Depends(get_current_user)):
             avatar=user.get("avatar", None),
             status=user.get("status", None),
         )
-        for user in list(users_db.values())
+        for user in list(users_db)
         if user.get("id", None) != current_user.get("id", None)
     ]
 
@@ -41,11 +41,9 @@ async def get_users(current_user: User = Depends(get_current_user)):
 async def update_user_status(
     status: str, current_user: User = Depends(get_current_user)
 ):
-    # Update user status
     user = users_db[current_user.username]
     user.status = status
 
-    # Broadcast status change to all users
     await publish_to_centrifugo(
         "user:all",
         {"type": "user_status_changed", "data": {"user_id": user.id, "status": status}},
@@ -55,7 +53,26 @@ async def update_user_status(
 
 
 @router.get("/contacts")
-def get_contacts(current_user: dict = Depends(get_current_user)):
+def get_contacts(current_user: User = Depends(get_current_user)):
     """Fetch contacts for the authenticated user"""
-    return get_users_with_last_message()
-    # return get_all_contacts()
+    try:
+        if current_user:
+            other_users = [
+                UserOut(
+                    id=user.get("id", None),
+                    username=user.get("username", None),
+                    name=user.get("name", None),
+                    avatar=user.get("avatar", None),
+                    status=user.get("status", None),
+                )
+                for user in list(users_db)
+                if user.get("id", None) != current_user.get("id", None)
+            ]
+
+            return (
+                get_users_with_last_message(sender_id=current_user.get("id"))
+                + other_users
+            )
+
+    except Exception as e:
+        raise ValueError(f"Exception in get_contacts API: {e}")

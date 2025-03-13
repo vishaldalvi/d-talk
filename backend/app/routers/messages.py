@@ -57,7 +57,7 @@ async def send_message(
 
 @router.get("/{contact_id}", response_model=List[Message])
 async def get_messages(contact_id: str, current_user: User = Depends(get_current_user)):
-    messages = get_messages_from_db(current_user.id, contact_id)
+    messages = get_messages_from_db(current_user.get("id"), contact_id)
     return messages
 
 

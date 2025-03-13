@@ -6,7 +6,7 @@ import uuid
 from dotenv import load_dotenv
 
 from app.models import User, UserCreate, UserOut, Token
-from app.database import get_user_from_db, save_user_to_db
+from app.database import get_user_from_db, save_user_to_db, UserDB
 from app.auth import (
     authenticate_user,
     create_access_token,
@@ -55,31 +55,34 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @router.post("/register", response_model=UserOut)
 async def register_user(user_data: UserCreate):
-    existing_user = get_user_from_db(user_data.username)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
+    try:
+        existing_user = get_user_from_db(user_data.username)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already registered",
+            )
+
+        user_id = generate_uuid()
+        hashed_password = get_password_hash(user_data.password)
+
+        new_user = UserDB(
+            id=user_id,
+            username=user_data.username,
+            name=user_data.name,
+            avatar=str(user_data.avatar) if user_data.avatar else "",
+            password_hash=hashed_password,
+            status=1,
         )
 
-    user_id = generate_uuid()
-    hashed_password = get_password_hash(user_data.password)
+        save_user_to_db(new_user)
 
-    new_user = User(
-        id=user_id,
-        username=user_data.username,
-        name=user_data.name,
-        avatar=user_data.avatar,
-        password_hash=hashed_password,
-        status=1,
-    )
-
-    save_user_to_db(new_user)
-
-    return UserOut(
-        id=new_user.id,
-        username=new_user.username,
-        name=new_user.name,
-        avatar=new_user.avatar,
-        status=new_user.status,
-    )
+        return UserOut(
+            id=new_user.id,
+            username=new_user.username,
+            name=new_user.name,
+            avatar=new_user.avatar,
+            status=new_user.status,
+        )
+    except Exception as e:
+        raise ValueError(f"Exception in register_user: {e}")
