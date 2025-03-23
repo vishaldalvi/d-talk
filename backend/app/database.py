@@ -13,18 +13,20 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session, aliased
 from sqlalchemy.sql import func
 from datetime import datetime
 from app.models import User
+from config_loader import load_config
 
-DATABASE_URL = "mysql+pymysql://root:neural123@localhost/d_talk"
+config = load_config(CONFIG_FILE_PATH=r"C:\Users\Vishal Dalvi\React\ChatApp\d-talk\backend\config.ini")
+
+DATABASE = config.get("DATABASE")
+DATABASE_URL = f"mysql+pymysql://{DATABASE['username']}:{DATABASE['password']}@{DATABASE['host']}/{DATABASE['database']}"
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 db = SessionLocal()
 Base = declarative_base()
 
-DATABASE_URL = "mysql+pymysql://root:neural123@localhost/d_talk"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
-
-redis_client = redis.Redis(host="localhost", port=6379, db=2, decode_responses=True)
+REDIS = config.get("REDIS")
+redis_client = redis.Redis(host=REDIS['host'], port=REDIS['port'], db=REDIS['db'], decode_responses=True)
 
 
 class UserDB(Base):
