@@ -8,56 +8,23 @@ import MessageInput from "@/app/components/MessageInput";
 import VideoCall from "@/app/components/VideoCall";
 import { Button } from "@/app/components/ui/button";
 import { Phone, Video, ArrowLeft, MoreVertical } from "lucide-react";
-
-const DEMO_CONTACTS = [
-  {
-    id: "1",
-    name: "Emma Wilson",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80",
-    status: "online",
-  },
-  {
-    id: "2",
-    name: "Alexander Lee",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80",
-    status: "offline",
-  },
-];
-
-const generateDemoMessages = (contactId: string) => [
-  {
-    id: "1",
-    content: "Hey, how are you?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    isSent: false,
-    status: "read" as const,
-  },
-  {
-    id: "2",
-    content: "I'm good! How about you?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 10), // 10 minutes ago
-    isSent: true,
-    status: "read" as const,
-  }
-];
+import { useAuth } from "@/app/context/AuthContext";
 
 const ChatRoom = () => {
   const router = useRouter();
   const params = useParams();
-  const [isClient, setIsClient] = useState(false);
+  const { fetchContacts, contacts, fetchMessages } = useAuth();
   const [contactId, setContactId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [inCall, setInCall] = useState<false | "audio" | "video">(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const contact = DEMO_CONTACTS.find(c => c.id === contactId || '');
+  const contact = contacts.find(c => c.id === contactId || '');
 
-  // useEffect(() => {
-  //   setIsClient(true);
-  // }, []);
-
-  // if (!isClient) return null;
+  useEffect(() => {
+    fetchContacts();
+  }, []);
 
   useEffect(() => {
     if (params.contactId) {
@@ -67,19 +34,17 @@ const ChatRoom = () => {
 
   useEffect(() => {
     if (contactId) {
-      setMessages(generateDemoMessages(contactId));
+      fetchMessages(contactId).then(fetchedMessages => {
+        setMessages(fetchedMessages);
+      });
+    } else {
+      setMessages([]);
     }
   }, [contactId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    setMessages([
-      { id: "1", timestamp: new Date() },
-    ]);
-  }, []);
 
   const handleSendMessage = (content: string) => {
     const newMessage = {

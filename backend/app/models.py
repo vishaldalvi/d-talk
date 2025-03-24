@@ -47,6 +47,7 @@ class Message(BaseModel):
     content: str
     timestamp: datetime
     status: str = "sent"
+    isSent: bool
 
 
 class MessageCreate(BaseModel):

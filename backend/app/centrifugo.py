@@ -10,7 +10,7 @@ load_dotenv()
 
 from config_loader import load_config
 
-config = load_config(CONFIG_FILE_PATH=r"C:\Users\Vishal Dalvi\React\ChatApp\d-talk\backend\config.ini")
+config = load_config(CONFIG_FILE_PATH="/home/neuralit/Music/NextJS/chattt/d-talk/backend/config.ini")
 CENTRIFUGO = config.get("CENTRIFUGO")
 
 # Centrifugo settings

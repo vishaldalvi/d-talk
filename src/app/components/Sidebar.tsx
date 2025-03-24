@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProfileAvatar from "./ProfileAvatar";
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
 import { LogOut } from "lucide-react";
 
@@ -21,50 +22,6 @@ type Contact = {
   unreadCount?: number;
 };
 
-const DEMO_CONTACTS: Contact[] = [
-  {
-    id: "1",
-    name: "Emma Wilson",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80",
-    status: "online",
-    lastMessage: "Let me know when you're free",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-    unreadCount: 2,
-  },
-  {
-    id: "2",
-    name: "Alexander Lee",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80",
-    status: "offline",
-    lastMessage: "The meeting is at 3pm tomorrow",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-  },
-  {
-    id: "3",
-    name: "Sophia Chen",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80",
-    status: "away",
-    lastMessage: "Did you see the latest update?",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    unreadCount: 1,
-  },
-  {
-    id: "4",
-    name: "James Rodriguez",
-    status: "online",
-    lastMessage: "Thanks for your help!",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
-  },
-  {
-    id: "5",
-    name: "Olivia Johnson",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80",
-    status: "busy",
-    lastMessage: "Can we reschedule for next week?",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
-  }
-];
-
 interface SidebarProps {
   user: { id: string; username: string; name: string; avatar: string; status: number; } | null;
   onCreateNewChat: () => void;
@@ -73,11 +30,12 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ user, onCreateNewChat }) => {
   const location = usePathname();
   const router = useRouter();
-
+  const { contacts } = useAuth();
+  const [new_contacts, setContacts] = useState<Contact[]>([]);
   const [activeTab, setActiveTab] = useState<"messages" | "calls">("messages");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredContacts = DEMO_CONTACTS.filter(contact =>
+  const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -197,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onCreateNewChat }) => {
                       <h3 className="font-medium text-sm truncate">{contact.name}</h3>
                       {contact && contact.lastMessageTime && (
                         <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap">
-                          {formatTime(contact.lastMessageTime)}
+                          {contact.lastMessageTime}
                         </span>
                       )}
                     </div>

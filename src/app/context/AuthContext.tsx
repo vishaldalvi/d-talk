@@ -14,9 +14,13 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  contacts: Contact[];
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   register: (username: string, name: string, password: string) => Promise<void>;
+  fetchContacts: () => void;
+  fetchMessages: (contact_id: string) => Promise<any[]>;
+  messages: any[];
 }
 
 interface LoginResponse {
@@ -39,18 +43,42 @@ interface RegisterResponse {
   status: number;
 }
 
+interface Contact {
+  id: string;
+  name: string;
+  avatar?: string;
+  status: "online" | "offline" | "away" | "busy";
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount?: number;
+}
+
+interface Messages {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  timestamp: Date;
+  status: string;
+  isSent: boolean;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const storedUser = localStorage.getItem("user");
+      const storedUser = Cookies.get("user");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
+        fetchContacts();
       }
       setIsLoading(false);
     };
@@ -69,9 +97,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response?.access_token) {
         Cookies.set("authToken", response.access_token, { expires: 7, secure: true });
         Cookies.set("user", JSON.stringify(response.user), { expires: 7, secure: true });
-
         setUser(response.user);
         router.push("/chat");
+        fetchContacts();
       } else {
         toast.error("Invalid login credentials or response missing token.");
       }
@@ -87,6 +115,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("user");
     setUser(null);
     router.push("/login");
+  };
+
+  const getToken = () => {
+    return Cookies.get("authToken");
   };
 
   const register = async (username: string, name: string, password: string) => {
@@ -110,8 +142,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const fetchContacts = async () => {
+    try {
+      const token = getToken();
+      const response = await alovaInstance.Get<Contact[]>("/users/contacts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).send();
+      setContacts(response);
+    } catch (error) {
+      console.error("Failed to fetch contacts:", error);
+    }
+  };
+
+  const fetchMessages = async (contact_id: string): Promise<any[]> => {
+    try {
+      const token = getToken();
+      const response = await alovaInstance.Get(`/messages/${contact_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).send() as any[];
+
+      setMessages(response);
+      return response;
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+      return [];
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoading, contacts, login, logout, register, fetchContacts, fetchMessages, messages }}>
       {children}
     </AuthContext.Provider>
   );

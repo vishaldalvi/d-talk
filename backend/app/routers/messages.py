@@ -4,7 +4,7 @@ from datetime import datetime
 import uuid
 
 from app.models import User, Message, MessageCreate
-from app.database import get_messages_from_db, save_message_to_db
+from app.database import get_messages_from_db, save_message_to_db, MessageDB
 from app.auth import get_current_user
 from app.centrifugo import publish_to_centrifugo
 
@@ -15,9 +15,8 @@ router = APIRouter(prefix="/messages", tags=["messages"])
 async def send_message(
     message_data: MessageCreate, current_user: User = Depends(get_current_user)
 ):
-    # Create new message
     message_id = str(uuid.uuid4())
-    new_message = Message(
+    new_message = MessageDB(
         id=message_id,
         sender_id=current_user.id,
         receiver_id=message_data.receiver_id,
@@ -26,10 +25,8 @@ async def send_message(
         status="sent",
     )
 
-    # Save to MySQL and cache in Redis
     save_message_to_db(new_message)
 
-    # Publish to both sender and receiver channels
     sender_channel = f"user:{current_user.id}"
     receiver_channel = f"user:{message_data.receiver_id}"
 
@@ -40,19 +37,18 @@ async def send_message(
         "content": new_message.content,
         "timestamp": new_message.timestamp.isoformat(),
         "status": new_message.status,
+        "isSent": bool(new_message.sender_id == current_user.get("id")),
     }
 
-    # Publish to sender's channel
     await publish_to_centrifugo(
         sender_channel, {"type": "message_sent", "data": message_dict}
     )
 
-    # Publish to receiver's channel
     await publish_to_centrifugo(
         receiver_channel, {"type": "message_received", "data": message_dict}
     )
 
-    return new_message
+    return Message(**message_dict)
 
 
 @router.get("/{contact_id}", response_model=List[Message])

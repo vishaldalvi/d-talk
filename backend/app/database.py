@@ -15,7 +15,9 @@ from datetime import datetime
 from app.models import User
 from config_loader import load_config
 
-config = load_config(CONFIG_FILE_PATH=r"C:\Users\Vishal Dalvi\React\ChatApp\d-talk\backend\config.ini")
+config = load_config(
+    CONFIG_FILE_PATH="/home/neuralit/Music/NextJS/chattt/d-talk/backend/config.ini"
+)
 
 DATABASE = config.get("DATABASE")
 DATABASE_URL = f"mysql+pymysql://{DATABASE['username']}:{DATABASE['password']}@{DATABASE['host']}/{DATABASE['database']}"
@@ -26,7 +28,9 @@ db = SessionLocal()
 Base = declarative_base()
 
 REDIS = config.get("REDIS")
-redis_client = redis.Redis(host=REDIS['host'], port=REDIS['port'], db=REDIS['db'], decode_responses=True)
+redis_client = redis.Redis(
+    host=REDIS["host"], port=REDIS["port"], db=REDIS["db"], decode_responses=True
+)
 
 
 class UserDB(Base):
@@ -150,9 +154,13 @@ def get_messages_from_db(user_id: str, contact_id: str):
 
         messages_list = [
             {
-                key: str(getattr(msg, key))
-                for key in vars(msg)
-                if not key.startswith("_")
+                "id": msg.id,
+                "sender_id": msg.sender_id,
+                "receiver_id": msg.receiver_id,
+                "content": msg.content,
+                "timestamp": msg.timestamp.isoformat(),
+                "status": msg.status,
+                "isSent": bool(msg.sender_id == user_id),
             }
             for msg in messages
         ]
@@ -172,7 +180,7 @@ def save_message_to_db(message: MessageDB):
         db.refresh(message)
 
         redis_key = f"messages:{message.sender_id}:{message.receiver_id}"
-        messages = get_messages_from_db(db, message.sender_id, message.receiver_id)
+        messages = get_messages_from_db(message.sender_id, message.receiver_id)
         messages.append(
             {
                 key: str(getattr(message, key))
