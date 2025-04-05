@@ -38,6 +38,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     centrifugo_token = await generate_centrifugo_token(user.get("id", None))
 
+    print("centrifugo_token", centrifugo_token)
     return {
         "access_token": access_token,
         "token_type": "bearer",

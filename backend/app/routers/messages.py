@@ -46,10 +46,10 @@ async def send_message(
         sender_channel, {"type": "message_sent", "data": message_dict}
     )
 
-    message_dict.update({"isSent": True})
-    await publish_to_centrifugo(
-        receiver_channel, {"type": "message_received", "data": message_dict}
-    )
+    # message_dict.update({"isSent": True})
+    # await publish_to_centrifugo(
+    #     receiver_channel, {"type": "message_received", "data": message_dict}
+    # )
 
     return Message(**message_dict)
 

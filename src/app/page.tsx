@@ -2,26 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Login from '@/app/pages/Login';
+import Cookies from 'js-cookie';
+import Loading from '@/app/loading';
 
 export default function Home() {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
-  const [user, setUser] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
-    const storedUser = localStorage.getItem('user');
-    setUser(storedUser);
+    const token = Cookies.get('authToken');
 
-    if (storedUser) {
-      router.push('/chat');
+    if (token) {
+      router.replace('/chat');
+    } else {
+      router.replace('/login');
     }
   }, [router]);
 
-  if (!isClient) {
-    return null;
-  }
-
-  return user ? null : <Login />;
+  return <Loading />;
 }

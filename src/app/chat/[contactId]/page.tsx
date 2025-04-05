@@ -11,7 +11,7 @@ import { Phone, Video, ArrowLeft, MoreVertical } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import Loading from "@/app/loading";
 import { Centrifuge } from "centrifuge";
-import { centToken } from "@/app/api/apiClient";
+import Cookies from 'js-cookie';
 
 const ChatRoom = () => {
   const router = useRouter();
@@ -23,6 +23,8 @@ const ChatRoom = () => {
   const [inCall, setInCall] = useState<false | "audio" | "video">(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const centrifugeRef = useRef<Centrifuge | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
 
   const contact = contacts.find(c => c.id === contactId || '');
 
@@ -46,8 +48,8 @@ const ChatRoom = () => {
         setLoading(false);
       });
 
-      const centrifuge = new Centrifuge("ws://localhost:9000/connection/websocket", {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzaHViaGFtLnBvIiwiZXhwIjoxNzQzOTE4NzA2LjExMzg1OH0.S8MS2u1Pv9xAkC2kyuqdxcOpZVwlsAqa34g7BrUqGCY"
+      const centrifuge = new Centrifuge("ws://10.10.7.28:9000/connection/websocket", {
+        token: Cookies.get("centToken")
       });
       centrifugeRef.current = centrifuge;
 
@@ -58,10 +60,24 @@ const ChatRoom = () => {
       const subscription = centrifuge.newSubscription(`user-${contactId}`);
 
       subscription.on("publication", (ctx) => {
-        console.log("New message received:", ctx.data.data);
-        console.log("messages", messages);
-        setMessages((prev) => [...prev, ctx.data.data]);
-        console.log("11.messages", messages);
+        const newMessage = ctx.data.data;
+        const isDuplicate = messages.some(
+          (msg) =>
+            msg.content === newMessage.content &&
+            Math.abs(new Date(msg.timestamp).getTime() - new Date(newMessage.timestamp).getTime()) < 1000
+        );
+
+        if (isDuplicate) return;
+
+        const shouldScroll = newMessage.isSent || isUserNearBottom();
+
+        setMessages((prev) => [...prev, newMessage]);
+
+        if (shouldScroll) {
+          requestAnimationFrame(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          });
+        }
       });
 
       subscription.subscribe();
@@ -78,24 +94,44 @@ const ChatRoom = () => {
   }, [contactId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
   }, [messages]);
 
   const handleSendMessage = (content: string) => {
+    const tempId = `local-${Date.now()}`;
+
     const newMessage = {
-      id: Date.now().toString(),
+      id: tempId,
       content,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       isSent: true,
       status: "sent" as const,
     };
 
+    setMessages((prev) => [...prev, newMessage]);
+
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
+
     if (contactId) {
-      setLoading(true);
-      sendMessage(contactId, content).finally(() => setLoading(false));
+      sendMessage(contactId, content);
     }
-    // setMessages(prev => [...prev, newMessage]);
   };
+
+  const isUserNearBottom = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return false;
+
+    const threshold = 150;
+    const position = container.scrollTop + container.clientHeight;
+    const height = container.scrollHeight;
+
+    return height - position <= threshold;
+  };
+
 
   const handleStartCall = (type: "audio" | "video") => {
     setInCall(type);
@@ -149,11 +185,12 @@ const ChatRoom = () => {
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto mt-16 mb-16 p-4 bg-gray-50 dark:bg-gray-900 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto mt-16 mb-16 p-4 bg-gray-50 dark:bg-gray-900 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent" ref={scrollContainerRef}>
         <div className="max-w-3xl mx-auto">
           {messages.map((message) => (
             <ChatMessage key={message.id} content={message.content} timestamp={message.timestamp} isSent={message.isSent} status={message.status} senderName={message.isSent ? undefined : contact.name} />
           ))}
+          <div ref={messagesEndRef} />
         </div>
       </div>
       <div className="fixed bottom-0 left-0 w-full z-10 bg-white dark:bg-gray-900 shadow-md">

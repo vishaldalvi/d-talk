@@ -18,7 +18,7 @@ CENTRIFUGO = config.get("CENTRIFUGO")
 
 # Centrifugo settings
 CENTRIFUGO_API_KEY = CENTRIFUGO.get("api_key", "104fdd55-fd2d-4094-b92e-9aba9da3c5bc")
-CENTRIFUGO_API_URL = CENTRIFUGO.get("api_url", "http://localhost:8001/api")
+CENTRIFUGO_API_URL = CENTRIFUGO.get("api_url", "http://10.10.7.28:8001/api")
 JWT_SECRET = CENTRIFUGO.get("jwt_secret", "e036b446-a43f-4966-ba22-4cd6506e2580")
 JWT_ALGORITHM = CENTRIFUGO.get("jwt_algorithm", "HS256")
 

@@ -40,8 +40,8 @@ API_PORT=8000
 
 # Centrifugo
 CENTRIFUGO_API_KEY=your-centrifugo-api-key
-CENTRIFUGO_API_URL=http://localhost:8001/api
-CENTRIFUGO_WS_URL=ws://localhost:8001/connection/websocket
+CENTRIFUGO_API_URL=http://10.10.7.28:8001/api
+CENTRIFUGO_WS_URL=ws://10.10.7.28:8001/connection/websocket
 
 # Auth
 JWT_SECRET=your-jwt-secret-key
@@ -73,7 +73,7 @@ npm install
 npm run dev
 ```
 
-Now your application should be running at <http://localhost:3000>.
+Now your application should be running at <http://10.10.7.28:3000>.
 
 ## Features
 

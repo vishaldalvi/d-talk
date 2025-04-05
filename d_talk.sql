@@ -2,7 +2,7 @@
 -- version 5.1.1deb5ubuntu1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
+-- Host: 10.10.7.28:3306
 -- Generation Time: Mar 24, 2025 at 09:48 AM
 -- Server version: 10.6.18-MariaDB-0ubuntu0.22.04.1
 -- PHP Version: 8.1.2-1ubuntu2.20

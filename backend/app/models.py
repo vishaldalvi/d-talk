@@ -33,6 +33,8 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     user: UserOut
+    centrifugo_token: str
+    centrifugo_ws_url: str
 
 
 class TokenData(BaseModel):

@@ -34,6 +34,8 @@ interface LoginResponse {
   };
   access_token: string;
   token_type: string;
+  centrifugo_token: string;
+  centrifugo_ws_url?: string;
 }
 
 interface RegisterResponse {
@@ -97,8 +99,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = (await alovaInstance.Post("/token", formData).send()) as LoginResponse;
 
       if (response?.access_token) {
-        Cookies.set("authToken", response.access_token, { expires: 7, secure: true });
-        Cookies.set("user", JSON.stringify(response.user), { expires: 7, secure: true });
+        Cookies.set("authToken", response.access_token, { expires: 7000 });
+        Cookies.set("user", JSON.stringify(response.user), { expires: 7000 });
+        Cookies.set("centToken", response?.centrifugo_token, { expires: 7000 });
         setUser(response.user);
         router.push("/chat");
         fetchContacts();

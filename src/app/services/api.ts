@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:8000";
+const API_URL = "http://10.10.7.28:8000";
 
 // Types
 export interface User {
