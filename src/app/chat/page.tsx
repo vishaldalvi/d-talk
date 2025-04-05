@@ -79,3 +79,13 @@ const Index = () => {
 };
 
 export default Index;
+
+
+// app/chat/page.tsx
+// export default function ChatHome() {
+//   return (
+//     <div className="h-full flex items-center justify-center text-gray-600 dark:text-gray-400">
+//       Select a conversation from the sidebar or start a new chat.
+//     </div>
+//   );
+// }

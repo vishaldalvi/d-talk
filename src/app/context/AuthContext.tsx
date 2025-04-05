@@ -21,6 +21,7 @@ interface AuthContextType {
   fetchContacts: () => void;
   fetchMessages: (contact_id: string) => Promise<any[]>;
   messages: any[];
+  sendMessage: (receiver_id: string, content: string) => Promise<any[]>;
 }
 
 interface LoginResponse {
@@ -46,6 +47,7 @@ interface RegisterResponse {
 interface Contact {
   id: string;
   name: string;
+  username: string;
   avatar?: string;
   status: "online" | "offline" | "away" | "busy";
   lastMessage?: string;
@@ -173,8 +175,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const sendMessage = async (receiver_id: string, content: string): Promise<any[]> => {
+    try {
+      const token = getToken();
+      const response = await alovaInstance.Post(
+        '/messages',
+        { receiver_id, content },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      ).send() as any[];
+
+      // setMessages(response);
+      return response;
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+      return [];
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, contacts, login, logout, register, fetchContacts, fetchMessages, messages }}>
+    <AuthContext.Provider value={{ user, isLoading, contacts, login, logout, register, fetchContacts, fetchMessages, messages, sendMessage }}>
       {children}
     </AuthContext.Provider>
   );

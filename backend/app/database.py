@@ -130,11 +130,11 @@ def save_user_to_db(user_data: UserDB):
 def get_messages_from_db(user_id: str, contact_id: str):
     """Fetch messages between two users."""
     try:
-        redis_key = f"messages:{user_id}:{contact_id}"
-        cached_messages = redis_client.get(redis_key)
+        # redis_key = f"messages:{user_id}:{contact_id}"
+        # cached_messages = redis_client.get(redis_key)
 
-        if cached_messages:
-            return json.loads(cached_messages)
+        # if cached_messages:
+        #     return json.loads(cached_messages)
 
         messages = (
             db.query(MessageDB)
@@ -149,6 +149,7 @@ def get_messages_from_db(user_id: str, contact_id: str):
                 )
             )
             .order_by(MessageDB.timestamp)
+            .distinct(MessageDB.id)
             .all()
         )
 
@@ -164,12 +165,14 @@ def get_messages_from_db(user_id: str, contact_id: str):
             }
             for msg in messages
         ]
-        redis_client.setex(redis_key, 3600, json.dumps(messages_list))
+
+        # redis_client.setex(redis_key, 3600, json.dumps(messages_list))
 
         return messages_list
 
     except Exception as e:
-        raise ValueError(f"Exception in get_messages_from_db: {e}")
+        print(f"Exception in get_messages_from_db: {e}")
+        return []
 
 
 def save_message_to_db(message: MessageDB):

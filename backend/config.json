@@ -1,0 +1,38 @@
+{
+  "client": {
+    "token": {
+      "hmac_secret_key": "kvaXAImTS4A95m2PtJyfdZcNgtl8-_8Wg6ar9aPaCoNWIKj2bvzHomLYatwhceeAAnAVzwQz4a37PqeHt9vdQg"
+    },
+    "allowed_origins": [
+      "*"
+    ]
+  },
+  "admin": {
+    "enabled": true,
+    "password": "7EC4553lvM3L3_vj-PXPbw",
+    "secret": "0N-Qxq9gn_LBgAsFRjt44AXDh-RG52vbwsfFTnEUc5gUCgHQ4AvNLxxFqt2rbRBnxaptbyb6Qk_gXg3cFYpFMA"
+  },
+  "http_api": {
+    "key": "p2MfjB0AjrsauXTbmubEQwfLSTjNKRpMoTupOWrOu2LchUEZlV-BCBo6NxA4DrKyG8bE2x6rdaYdqecZ_rraLw"
+  },
+  "http_server": {
+    "address": "0.0.0.0",
+    "port": 9000
+  },
+  "channel": {
+    "without_namespace": {
+      "presence": true,
+      "allow_subscribe_for_client": true
+    },
+    "namespaces": [
+      {
+        "name": "facts",
+        "history_size": 10,
+        "history_ttl": "300s"
+      },
+      {
+        "name": "gossips"
+      }
+    ]
+  }
+}

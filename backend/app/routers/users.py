@@ -59,20 +59,28 @@ def get_contacts(current_user: User = Depends(get_current_user)):
         if current_user:
             other_users = [
                 UserOut(
-                    id=user.get("id", None),
-                    username=user.get("username", None),
-                    name=user.get("name", None),
-                    avatar=user.get("avatar", None),
-                    status=user.get("status", None),
+                    id=user["id"],
+                    username=user["username"],
+                    name=user["name"],
+                    avatar=user["avatar"],
+                    status=user["status"],
                 )
-                for user in list(users_db)
-                if user.get("id", None) != current_user.get("id", None)
+                for user in users_db
+                if user["id"] != current_user["id"]
             ]
 
-            return (
-                get_users_with_last_message(sender_id=current_user.get("id"))
-                + other_users
-            )
+            unique_users = {
+                user.get("id"): user
+                for user in get_users_with_last_message(sender_id=current_user["id"])
+            }
+
+            unique_user_ids = set(unique_users.keys())
+            filtered_other_users = [
+                user for user in other_users if user.id not in unique_user_ids
+            ]
+
+            final_users = list(unique_users.values()) + filtered_other_users
+            return final_users
 
     except Exception as e:
         raise ValueError(f"Exception in get_contacts API: {e}")

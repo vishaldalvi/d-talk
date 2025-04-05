@@ -1,13 +1,14 @@
 
 {
   "token_hmac_secret_key": "1c185830-2019-41ab-bf04-5e9862eef369",
-  "admin_password": "14a60813-acdf-4af9-84c0-cde4ced3e516",
-  "admin_secret": "e036b446-a43f-4966-ba22-4cd6506e2580",
   "api_key": "104fdd55-fd2d-4094-b92e-9aba9da3c5bc",
   "allowed_origins": ["*"],
   "port": "9000",
   "allow_subscribe_for_client": true,
   "allow_publish_for_subscriber": true,
-  "anonymous": false,
-  "admin": true
+  "admin": {
+    "enabled": true,
+    "password": "14a60813-acdf-4af9-84c0-cde4ced3e516",
+    "secret": "e036b446-a43f-4966-ba22-4cd6506e2580"
+  }
 }

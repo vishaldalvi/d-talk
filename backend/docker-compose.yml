@@ -7,7 +7,7 @@ services:
     volumes:
       - ./centrifugo.json:/centrifugo/config.json
     ports:
-      - "8001:8000"
+      - "9000:9000"
     command: centrifugo -c config.json
     restart: always
 
