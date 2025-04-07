@@ -34,5 +34,8 @@
         "name": "gossips"
       }
     ]
-  }
+  },
+  "publish": true,
+  "subscribe_to_publish": true,
+  "stream": false
 }
